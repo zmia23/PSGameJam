@@ -1,10 +1,11 @@
 using UnityEngine;
 
-public class Movement : MonoBehaviour
+public class PlayerMovement : MonoBehaviour
 {
     public float speed;
     private Rigidbody2D rb;
     private IInputProvider inputProvider;
+    private Vector2 playerVelocity;
 
     private void Awake()
     {
@@ -27,6 +28,19 @@ public class Movement : MonoBehaviour
         movementInput.Normalize();
         
         rb.velocity = movementInput * speed * Time.fixedDeltaTime;
+        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+        playerVelocity = rb.velocity;
+    }
+
+    public void StopMovement()
+    {
+        rb.velocity = Vector2.zero;
+        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+    }
+
+    public Vector2 GetPlayerVelocity()
+    {
+        return playerVelocity;
     }
 
     private bool IsControllerConnected()
