@@ -2,13 +2,18 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
+    [SerializeField] private Camera mainCamera;
     public float speed;
     private Rigidbody2D rb;
     private IInputProvider inputProvider;
     private Vector2 playerVelocity;
+    private Animator animator;
+
 
     private void Awake()
     {
+        mainCamera = Camera.main;
+
         rb = GetComponent<Rigidbody2D>();
 
         // Initialize the input provider
@@ -20,8 +25,14 @@ public class PlayerMovement : MonoBehaviour
         {
             inputProvider = new KeyboardInputProvider();
         }
-    }
 
+        animator = GetComponent<Animator>();
+    }
+    private void Update()
+    {
+        HandleAnimation();
+        HandleRotation();
+    }
     private void FixedUpdate()
     {
         Vector2 movementInput = inputProvider.GetInput();
@@ -30,6 +41,21 @@ public class PlayerMovement : MonoBehaviour
         rb.velocity = movementInput * speed * Time.fixedDeltaTime;
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
         playerVelocity = rb.velocity;
+    }
+    private void HandleRotation()
+    {
+        if (transform.position.x > GetMouseWorldPosition().x)
+        {
+            transform.rotation = new Quaternion(0, 0, 0, 0);
+        }
+        else
+        {
+            transform.rotation = new Quaternion(0, 360, 0, 0);
+        }
+    }
+    private void HandleAnimation()
+    {
+        animator.SetFloat("Speed", rb.velocity.sqrMagnitude);
     }
 
     public void StopMovement()
@@ -46,6 +72,15 @@ public class PlayerMovement : MonoBehaviour
     private bool IsControllerConnected()
     {
         return Input.GetJoystickNames().Length > 0;
+    }
+    private Vector3 GetMouseWorldPosition()
+    {
+        Vector3 mousePosition = Input.mousePosition;
+
+        Vector3 worldPosition = mainCamera.ScreenToWorldPoint(new Vector3(mousePosition.x, mousePosition.y, 10f));
+        
+        return worldPosition;
+
     }
 }
 
